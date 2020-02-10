@@ -58,8 +58,8 @@ public class BeatBox {
         readIn.addActionListener(new MyReadInListener());
         buttonBox.add(readIn);
 
-        JButton send = new JButton("Send");
-        send.addActionListener(new MySendListener());
+        JButton send = new JButton("Save");
+        send.addActionListener(new MySaveListener());
         buttonBox.add(send);
 
         Box nameBox = new Box(BoxLayout.Y_AXIS);
@@ -172,56 +172,67 @@ public class BeatBox {
         }
     }
 
-    public class MySendListener implements ActionListener{
+    public class MySaveListener implements ActionListener{
 
         public void actionPerformed(ActionEvent actionEvent) {
-            boolean[] checkBoxState = new boolean[256];
-
-            for (int i = 0; i<256; i++){
-
-                JCheckBox check = (JCheckBox)checkBoxArrayList.get(i);
-                if (check.isSelected()){
-                    checkBoxState[i] = true;
-                }
-            }
-
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(new File("Checkbox.ser"));
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(checkBoxState);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.showSaveDialog(frame);
+            saveFile(fileChooser.getSelectedFile());
         }
     }
 
     public class MyReadInListener implements ActionListener{
 
         public void actionPerformed(ActionEvent actionEvent) {
-            boolean[] checkBoxState = new boolean[256];
-
-            try {
-                FileInputStream fileInputStream = new FileInputStream(new File("Checkbox.ser"));
-                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                checkBoxState = (boolean[]) objectInputStream.readObject();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            for (int i = 0; i<256; i++){
-
-                JCheckBox check = (JCheckBox)checkBoxArrayList.get(i);
-                if (checkBoxState[i]){
-                    check.setSelected(true);
-                } else {
-                    check.setSelected(false);
-                }
-            }
-
-
-
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.showOpenDialog(frame);
+            loadFile(fileChooser.getSelectedFile());
         }
+    }
+    ////////////////СОХРАНЕНИЕ//////////////////////
+    private void loadFile(File file){
+        boolean[] checkBoxState = new boolean[256];
+
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            checkBoxState = (boolean[]) objectInputStream.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i<256; i++){
+
+            JCheckBox check = (JCheckBox)checkBoxArrayList.get(i);
+            if (checkBoxState[i]){
+                check.setSelected(true);
+            } else {
+                check.setSelected(false);
+            }
+        }
+        sequencer.stop();
+        buildTrackAndStart();
+    }
+
+    private void saveFile(File file){
+        boolean[] checkBoxState = new boolean[256];
+
+        for (int i = 0; i<256; i++){
+
+            JCheckBox check = (JCheckBox)checkBoxArrayList.get(i);
+            if (check.isSelected()){
+                checkBoxState[i] = true;
+            }
+        }
+
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(checkBoxState);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     ////////////////МЕТОДЫ_СОЗДАНИЯ/////////////////
